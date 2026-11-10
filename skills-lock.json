@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "d6cb30212b3b19f531378574784af1da09928b2e5078f299eaeaedd50191a4af"
+    },
+    "vibe-webeffect": {
+      "source": "cdsassj00/vibe-webeffect",
+      "sourceType": "github",
+      "skillPath": "skills/vibe-webeffect/SKILL.md",
+      "computedHash": "db911d17522080433eb0f20692e24f2d25bb338ae159c9f0a93608505e770a71"
+    }
+  }
+}

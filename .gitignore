@@ -1,0 +1,31 @@
+# 환경변수와 비밀값
+.env
+.env.*
+!.env.example
+
+# 설치 의존성
+node_modules/
+
+# 실행·검사 결과
+__pycache__/
+*.py[cod]
+dist/
+build/
+coverage/
+result/
+results/
+output/
+outputs/
+*.log
+*.tmp
+*.temp
+
+# 과정 규칙상 공개하지 않는 완성본
+99_완성본_잠금/
+
+# 공개 저장소에 올리지 않는 원자료·문서 산출물
+/원문/
+/부서회신/
+/data/
+/*.hwpx
+

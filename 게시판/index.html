@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="공지, 일정, 자료를 한눈에 확인하는 주요 소식 게시판">
+  <title>주요 소식 게시판</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="주요 소식 홈">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span><strong>NEWSROOM</strong><small>주요 소식 게시판</small></span>
+      </a>
+      <nav aria-label="주 메뉴">
+        <a class="active" href="#board">게시판</a>
+        <a href="#quick">바로가기</a>
+        <a href="#footer">이용안내</a>
+      </nav>
+      <button class="write-button" id="openWriteButton" type="button">
+        <span aria-hidden="true">＋</span> 새 글 작성
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-decoration hero-decoration-one"></div>
+      <div class="hero-decoration hero-decoration-two"></div>
+      <div class="hero-inner">
+        <p class="eyebrow">IMPORTANT UPDATES</p>
+        <h1 id="heroTitle">꼭 알아야 할 소식을<br><em>한눈에 확인하세요.</em></h1>
+        <p class="hero-copy">공지사항부터 주요 일정, 업무 자료까지 필요한 정보를 빠르게 찾아볼 수 있습니다.</p>
+        <form class="hero-search" id="searchForm" role="search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
+          <input id="searchInput" type="search" placeholder="찾고 싶은 내용을 검색해 보세요" autocomplete="off">
+          <button type="submit">검색</button>
+        </form>
+        <div class="popular-keywords" aria-label="추천 검색어">
+          <span>추천 검색어</span>
+          <button type="button" data-keyword="교육"># 교육</button>
+          <button type="button" data-keyword="일정"># 일정</button>
+          <button type="button" data-keyword="자료"># 자료</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-links" id="quick" aria-label="주요 바로가기">
+      <div class="quick-card">
+        <span class="quick-icon blue" aria-hidden="true">📢</span>
+        <div><small>필독</small><strong>공지사항</strong></div>
+        <span class="quick-count" id="noticeCount">0</span>
+      </div>
+      <div class="quick-card">
+        <span class="quick-icon mint" aria-hidden="true">📅</span>
+        <div><small>놓치지 마세요</small><strong>주요 일정</strong></div>
+        <span class="quick-count" id="scheduleCount">0</span>
+      </div>
+      <div class="quick-card">
+        <span class="quick-icon orange" aria-hidden="true">📁</span>
+        <div><small>업무에 활용</small><strong>자료실</strong></div>
+        <span class="quick-count" id="resourceCount">0</span>
+      </div>
+    </section>
+
+    <section class="board-section" id="board">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow dark">LATEST POSTS</p>
+          <h2>주요 게시글</h2>
+          <p>새롭게 등록된 소식을 확인해 보세요.</p>
+        </div>
+        <p class="result-summary" id="resultSummary" aria-live="polite"></p>
+      </div>
+
+      <div class="board-tools">
+        <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="게시글 분류">
+          <button class="active" type="button" data-category="전체" role="tab" aria-selected="true">전체</button>
+          <button type="button" data-category="공지" role="tab" aria-selected="false">공지사항</button>
+          <button type="button" data-category="일정" role="tab" aria-selected="false">주요 일정</button>
+          <button type="button" data-category="자료" role="tab" aria-selected="false">자료실</button>
+        </div>
+        <select id="sortSelect" aria-label="게시글 정렬">
+          <option value="latest">최신순</option>
+          <option value="views">조회순</option>
+          <option value="oldest">오래된순</option>
+        </select>
+      </div>
+
+      <div class="board-list" id="boardList"></div>
+
+      <div class="empty-state hidden" id="emptyState">
+        <span aria-hidden="true">⌕</span>
+        <strong>검색 결과가 없습니다</strong>
+        <p>다른 검색어나 분류를 선택해 보세요.</p>
+        <button type="button" id="clearSearchButton">전체 글 보기</button>
+      </div>
+
+      <nav class="pagination" id="pagination" aria-label="게시글 페이지"></nav>
+    </section>
+  </main>
+
+  <footer id="footer">
+    <div class="footer-inner">
+      <div class="footer-brand"><span class="brand-mark">N</span><strong>NEWSROOM</strong></div>
+      <p>주요 소식과 업무 자료를 빠르고 편리하게 확인하세요.</p>
+      <small>© 2026 Newsroom Board. All rights reserved.</small>
+    </div>
+  </footer>
+
+  <dialog class="post-dialog" id="postDialog">
+    <article>
+      <button class="dialog-close" type="button" data-close-dialog aria-label="닫기">×</button>
+      <div class="dialog-meta"><span id="dialogCategory"></span><time id="dialogDate"></time></div>
+      <h2 id="dialogTitle"></h2>
+      <div class="dialog-info"><span id="dialogAuthor"></span><span id="dialogViews"></span></div>
+      <div class="dialog-content" id="dialogContent"></div>
+      <div class="attachment hidden" id="dialogAttachment">
+        <span aria-hidden="true">↓</span>
+        <div><small>첨부파일</small><strong id="attachmentName"></strong></div>
+        <button type="button" id="downloadAttachment">다운로드</button>
+      </div>
+      <div class="dialog-actions"><button type="button" data-close-dialog>목록으로</button></div>
+    </article>
+  </dialog>
+
+  <dialog class="write-dialog" id="writeDialog">
+    <form id="writeForm">
+      <div class="write-heading">
+        <div><p class="eyebrow dark">NEW POST</p><h2>새 글 작성</h2></div>
+        <button class="dialog-close" type="button" data-close-write aria-label="닫기">×</button>
+      </div>
+      <label>분류<select name="category" required><option value="공지">공지사항</option><option value="일정">주요 일정</option><option value="자료">자료실</option></select></label>
+      <label>제목<input name="title" maxlength="80" placeholder="제목을 입력하세요" required></label>
+      <label>작성자<input name="author" maxlength="20" placeholder="작성자 이름" required></label>
+      <label>내용<textarea name="content" rows="8" placeholder="게시할 주요 내용을 입력하세요" required></textarea></label>
+      <label>첨부파일명 <span>(선택)</span><input name="attachment" maxlength="60" placeholder="예: 주요업무_안내.pdf"></label>
+      <div class="form-actions"><button type="button" data-close-write>취소</button><button class="submit-button" type="submit">게시하기</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

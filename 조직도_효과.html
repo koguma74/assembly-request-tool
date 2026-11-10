@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A부 조직도 26개 과</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <style>
+    :root {
+      --navy: #123453;
+      --navy-deep: #09243d;
+      --blue: #176b9e;
+      --sky: #dceef8;
+      --mint: #27a58b;
+      --paper: #f7fafc;
+      --white: #ffffff;
+      --ink: #172531;
+      --muted: #61717e;
+      --line: #d7e1e8;
+      --shadow: 0 18px 50px rgba(18, 52, 83, .12);
+      --spring: cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 8%, rgba(39, 165, 139, .12), transparent 28rem),
+        linear-gradient(180deg, #edf5f9 0, var(--paper) 24rem, var(--paper) 100%);
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+    }
+
+    button, input { font: inherit; }
+
+    .skip-link {
+      position: fixed;
+      top: .75rem;
+      left: .75rem;
+      z-index: 20;
+      padding: .65rem 1rem;
+      color: var(--white);
+      background: var(--navy-deep);
+      border-radius: .6rem;
+      transform: translateY(-180%);
+    }
+
+    .skip-link:focus { transform: none; }
+
+    .page {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0 4rem;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: end;
+      padding: clamp(1.75rem, 5vw, 3.5rem);
+      color: var(--white);
+      background: linear-gradient(135deg, var(--navy-deep), var(--navy) 56%, #145f72);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 22rem;
+      height: 22rem;
+      right: -8rem;
+      top: -12rem;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 50%;
+      box-shadow: 0 0 0 4rem rgba(255, 255, 255, .035), 0 0 0 8rem rgba(255, 255, 255, .025);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 .65rem;
+      color: #9de4d3;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.65rem);
+      line-height: 1.13;
+      letter-spacing: -.045em;
+    }
+
+    .hero-description {
+      max-width: 46rem;
+      margin: 1rem 0 0;
+      color: #dce9f2;
+      font-size: 1.03rem;
+    }
+
+    .stat {
+      position: relative;
+      z-index: 1;
+      min-width: 10rem;
+      padding: 1.1rem 1.25rem;
+      background: rgba(255, 255, 255, .09);
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-number {
+      display: block;
+      color: #ffffff;
+      font-size: 2.6rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: .55rem;
+      color: #bcd4e3;
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(16rem, 1fr) auto;
+      gap: .75rem;
+      margin: 1.4rem 0 1rem;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-wrap svg {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      color: #72828e;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      min-height: 3.25rem;
+      padding: .8rem 1rem .8rem 2.85rem;
+      color: var(--ink);
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+      outline: none;
+      box-shadow: 0 8px 24px rgba(18, 52, 83, .06);
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    #search:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(23, 107, 158, .13);
+    }
+
+    .reset-button {
+      position: relative;
+      overflow: hidden;
+      min-height: 3.25rem;
+      padding: .75rem 1.2rem;
+      color: var(--navy);
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .5s var(--spring), border-color .2s ease;
+    }
+
+    .reset-button:hover { border-color: #8db5cc; transform: translateY(-2px); }
+    .reset-button:active { transform: translateY(0) scale(.98); }
+
+    .ripple-dot {
+      position: absolute;
+      width: 1rem;
+      height: 1rem;
+      margin: -.5rem;
+      background: rgba(23, 107, 158, .22);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: ripple .6s ease-out forwards;
+    }
+
+    @keyframes ripple {
+      to { opacity: 0; transform: scale(16); }
+    }
+
+    .summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: .75rem;
+      margin: 0 0 .75rem;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .summary-bar strong { color: var(--navy); }
+
+    .table-wrap {
+      overflow: auto;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      min-width: 940px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: .94rem;
+    }
+
+    caption {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 1rem .9rem;
+      color: var(--white);
+      background: var(--navy);
+      border-bottom: 1px solid var(--navy-deep);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    thead th:first-child { width: 4rem; text-align: center; }
+    thead th:nth-child(2) { width: 10.5rem; }
+    thead th:nth-child(3) { width: 12rem; }
+    thead th:nth-child(4) { width: 25rem; }
+
+    tbody tr {
+      position: relative;
+      transition: transform .42s var(--spring), box-shadow .25s ease, background-color .2s ease;
+    }
+
+    tbody tr:nth-child(even) { background: #f7fafc; }
+    tbody tr:hover {
+      z-index: 1;
+      background: #edf7fa;
+      box-shadow: inset 4px 0 0 var(--mint), 0 8px 22px rgba(18, 52, 83, .10);
+    }
+
+    tbody tr[hidden] { display: none; }
+
+    td {
+      padding: .92rem .9rem;
+      border-bottom: 1px solid #e4ebef;
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    td:first-child { color: #7c8992; text-align: center; font-variant-numeric: tabular-nums; }
+    td:nth-child(3) { color: var(--navy-deep); font-weight: 800; }
+
+    .group-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.85rem;
+      padding: .22rem .6rem;
+      color: var(--badge-ink, #17445f);
+      background: var(--badge-bg, #e5f1f7);
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .g1 { --badge-bg: #dceef8; --badge-ink: #165a80; }
+    .g2 { --badge-bg: #e9e2f8; --badge-ink: #60488d; }
+    .g3 { --badge-bg: #f8e4e4; --badge-ink: #984e52; }
+    .g4 { --badge-bg: #f5edda; --badge-ink: #85631e; }
+    .g5 { --badge-bg: #dff2ed; --badge-ink: #217563; }
+    .g6 { --badge-bg: #e6edfb; --badge-ink: #4665a1; }
+    .g7 { --badge-bg: #fce9d9; --badge-ink: #915c2a; }
+    .g8 { --badge-bg: #e1f1e1; --badge-ink: #39743b; }
+    .g9 { --badge-bg: #eee7dc; --badge-ink: #6d5a3c; }
+
+    .keywords {
+      color: #275e77;
+      word-break: keep-all;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state.show { display: block; }
+
+    .source-note {
+      margin: 1rem .15rem 0;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .js [data-reveal] {
+      opacity: 0;
+      transform: translateY(34px);
+      transition: opacity .7s cubic-bezier(.2, .7, .2, 1), transform .7s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .js [data-reveal].show { opacity: 1; transform: none; }
+
+    .js .table-wrap tbody tr {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    .js .table-wrap.show tbody tr {
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity .55s cubic-bezier(.2, .7, .2, 1),
+        transform .55s var(--spring),
+        box-shadow .25s ease,
+        background-color .2s ease;
+      transition-delay: var(--delay, 0ms), var(--delay, 0ms), 0ms, 0ms;
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 1rem, 1180px); padding-top: .5rem; }
+      .hero { grid-template-columns: 1fr; border-radius: 1rem; }
+      .stat { width: 100%; }
+      .controls { grid-template-columns: 1fr; }
+      .reset-button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+      .js [data-reveal], .js .table-wrap tbody tr {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .reset-button:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#org-table">조직도 표로 바로가기</a>
+
+  <main class="page">
+    <header class="hero" data-reveal>
+      <div>
+        <p class="eyebrow">A부 조직 정보</p>
+        <h1>조직도 · 26개 과</h1>
+        <p class="hero-description">실국별 소속 과, 주요업무와 대표키워드를 한 화면에서 확인할 수 있습니다. 검색창에 실국명·과명·업무·키워드를 입력하면 해당 행만 남습니다.</p>
+      </div>
+      <div class="stat" aria-label="조직 규모">
+        <strong class="stat-number" data-count="26">26</strong>
+        <span class="stat-label">9개 실국 · 26개 과</span>
+      </div>
+    </header>
+
+    <section aria-labelledby="table-heading" data-reveal>
+      <h2 id="table-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">A부 조직도 표</h2>
+      <div class="controls">
+        <label class="search-wrap">
+          <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">조직도 검색</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.4-3.4"></path></svg>
+          <input id="search" type="search" placeholder="예: 인공지능, 안전, 기획조정실" autocomplete="off">
+        </label>
+        <button class="reset-button" id="reset" type="button">검색 초기화</button>
+      </div>
+
+      <div class="summary-bar" aria-live="polite">
+        <span>검색 결과 <strong id="visible-count">26</strong>개 과</span>
+        <span>표를 가로로 밀어 전체 열을 확인할 수 있습니다.</span>
+      </div>
+
+      <div class="table-wrap" data-reveal id="table-region">
+        <table id="org-table">
+          <caption>A부 조직도 26개 과의 실국, 과, 주요업무와 대표키워드</caption>
+          <thead>
+            <tr>
+              <th scope="col">번호</th>
+              <th scope="col">실국</th>
+              <th scope="col">과</th>
+              <th scope="col">주요업무</th>
+              <th scope="col">대표키워드</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><span class="group-badge g1">기획조정실</span></td><td>기획재정담당관</td><td>예산 편성·결산, 성과관리, 국회 업무 총괄</td><td class="keywords">예산 · 결산 · 세출 · 성과관리</td></tr>
+            <tr><td>2</td><td><span class="group-badge g1">기획조정실</span></td><td>혁신행정담당관</td><td>조직·정원, 정부혁신, 행정제도</td><td class="keywords">조직 · 정원 · 직제 · 정부혁신</td></tr>
+            <tr><td>3</td><td><span class="group-badge g1">기획조정실</span></td><td>규제개혁법무담당관</td><td>법령 제·개정, 규제개혁, 소송</td><td class="keywords">법령 · 시행령 · 시행규칙 · 고시</td></tr>
+            <tr><td>4</td><td><span class="group-badge g1">기획조정실</span></td><td>정보화담당관</td><td>정보시스템 운영, 정보화 예산, 개인정보 보호</td><td class="keywords">정보시스템 · 홈페이지 · 전산 · 정보화사업</td></tr>
+            <tr><td>5</td><td><span class="group-badge g2">대변인실</span></td><td>홍보담당관</td><td>언론 대응, 정책 홍보, 보도자료</td><td class="keywords">홍보 · 보도자료 · 언론 · 광고</td></tr>
+            <tr><td>6</td><td><span class="group-badge g3">감사관실</span></td><td>감사담당관</td><td>자체감사, 공직기강, 부패방지</td><td class="keywords">감사 · 공직기강 · 징계 · 부패</td></tr>
+            <tr><td>7</td><td><span class="group-badge g4">운영지원과</span></td><td>운영지원과</td><td>인사·복무, 청사관리, 업무추진비, 관용차량</td><td class="keywords">인사 · 승진 · 복무 · 청사</td></tr>
+            <tr><td>8</td><td><span class="group-badge g5">디지털정책국</span></td><td>디지털정책과</td><td>디지털 전환 정책, AI 행정 도입</td><td class="keywords">디지털전환 · 인공지능 · AI · 디지털플랫폼</td></tr>
+            <tr><td>9</td><td><span class="group-badge g5">디지털정책국</span></td><td>데이터정책과</td><td>공공데이터 개방, 데이터 표준</td><td class="keywords">공공데이터 · 데이터 개방 · 데이터표준 · 빅데이터</td></tr>
+            <tr><td>10</td><td><span class="group-badge g5">디지털정책국</span></td><td>정보보호과</td><td>사이버 보안, 해킹 대응</td><td class="keywords">사이버 · 해킹 · 보안 · 랜섬웨어</td></tr>
+            <tr><td>11</td><td><span class="group-badge g5">디지털정책국</span></td><td>공공서비스혁신과</td><td>전자정부 서비스, 온라인 민원</td><td class="keywords">전자정부 · 온라인 민원 · 모바일 신분증 · 간편인증</td></tr>
+            <tr><td>12</td><td><span class="group-badge g6">지역지원국</span></td><td>지역정책과</td><td>지역 정책 총괄, 지자체 협력</td><td class="keywords">지자체 · 지역정책 · 자치 · 지방자치</td></tr>
+            <tr><td>13</td><td><span class="group-badge g6">지역지원국</span></td><td>지역개발과</td><td>지역개발사업, 기반시설</td><td class="keywords">지역개발 · 개발사업 · 도시재생 · 기반시설</td></tr>
+            <tr><td>14</td><td><span class="group-badge g6">지역지원국</span></td><td>균형발전과</td><td>국가균형발전, 인구감소지역</td><td class="keywords">균형발전 · 인구감소 · 소멸 · 지방이전</td></tr>
+            <tr><td>15</td><td><span class="group-badge g6">지역지원국</span></td><td>지방재정협력과</td><td>지방교부세, 국고보조금</td><td class="keywords">교부세 · 보조금 · 국고보조 · 지방재정</td></tr>
+            <tr><td>16</td><td><span class="group-badge g7">안전관리국</span></td><td>안전정책과</td><td>안전 정책 총괄, 안전 점검 제도</td><td class="keywords">안전정책 · 안전점검 · 안전관리 · 안전문화</td></tr>
+            <tr><td>17</td><td><span class="group-badge g7">안전관리국</span></td><td>재난대응과</td><td>재난 대응, 재난 지원금</td><td class="keywords">재난 · 태풍 · 호우 · 지진</td></tr>
+            <tr><td>18</td><td><span class="group-badge g7">안전관리국</span></td><td>시설안전과</td><td>공공시설 안전, 노후시설</td><td class="keywords">시설물 · 노후시설 · 교량 · 터널</td></tr>
+            <tr><td>19</td><td><span class="group-badge g7">안전관리국</span></td><td>기후위기대응과</td><td>기후위기 적응, 폭염·한파 대책</td><td class="keywords">기후 · 폭염 · 한파 · 탄소</td></tr>
+            <tr><td>20</td><td><span class="group-badge g8">산업협력국</span></td><td>산업정책과</td><td>산업 정책, 규제 샌드박스</td><td class="keywords">산업정책 · 신산업 · 규제 샌드박스 · 첨단산업</td></tr>
+            <tr><td>21</td><td><span class="group-badge g8">산업협력국</span></td><td>중소기업지원과</td><td>중소기업·소상공인 지원 사업</td><td class="keywords">중소기업 · 소상공인 · 창업 · 벤처</td></tr>
+            <tr><td>22</td><td><span class="group-badge g8">산업협력국</span></td><td>국제협력과</td><td>국제기구 협력, 해외 협력사업</td><td class="keywords">국제기구 · ODA · 해외 협력 · 양해각서</td></tr>
+            <tr><td>23</td><td><span class="group-badge g8">산업협력국</span></td><td>통상협력과</td><td>통상 협상, 수출 지원</td><td class="keywords">통상 · 수출 · FTA · 관세</td></tr>
+            <tr><td>24</td><td><span class="group-badge g9">인재정책국</span></td><td>인재정책과</td><td>인재 양성 정책, 장학 사업</td><td class="keywords">인재양성 · 장학 · 청년인재 · 전문인력</td></tr>
+            <tr><td>25</td><td><span class="group-badge g9">인재정책국</span></td><td>교육훈련과</td><td>공무원·민간 교육훈련</td><td class="keywords">교육훈련 · 연수 · 교육과정 · 직무교육</td></tr>
+            <tr><td>26</td><td><span class="group-badge g9">인재정책국</span></td><td>고용지원과</td><td>고용 지원 사업, 일자리</td><td class="keywords">일자리 · 고용 · 취업 · 청년고용</td></tr>
+          </tbody>
+        </table>
+        <div class="empty-state" id="empty-state">검색어와 일치하는 과가 없습니다.</div>
+      </div>
+
+      <p class="source-note">자료 출처: <code>data/A부_조직도_26개과.csv</code> · 표 데이터는 이 HTML 파일 안에 포함되어 있어 인터넷 연결 없이 열립니다.</p>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const rows = [...document.querySelectorAll("#org-table tbody tr")];
+      const search = document.querySelector("#search");
+      const reset = document.querySelector("#reset");
+      const visibleCount = document.querySelector("#visible-count");
+      const emptyState = document.querySelector("#empty-state");
+      const number = document.querySelector("[data-count]");
+
+      rows.forEach((row, index) => {
+        row.style.setProperty("--delay", `${Math.min(index * 24, 600)}ms`);
+      });
+
+      function filterRows() {
+        const query = search.value.trim().toLocaleLowerCase("ko-KR");
+        let count = 0;
+        rows.forEach(row => {
+          const matches = !query || row.textContent.toLocaleLowerCase("ko-KR").includes(query);
+          row.hidden = !matches;
+          if (matches) count += 1;
+        });
+        visibleCount.textContent = count;
+        emptyState.classList.toggle("show", count === 0);
+      }
+
+      search.addEventListener("input", filterRows);
+
+      reset.addEventListener("click", event => {
+        search.value = "";
+        filterRows();
+        search.focus();
+
+        if (REDUCE) return;
+        const rect = reset.getBoundingClientRect();
+        const dot = document.createElement("span");
+        dot.className = "ripple-dot";
+        dot.style.left = `${event.clientX ? event.clientX - rect.left : rect.width / 2}px`;
+        dot.style.top = `${event.clientY ? event.clientY - rect.top : rect.height / 2}px`;
+        reset.append(dot);
+        dot.addEventListener("animationend", () => dot.remove(), { once: true });
+      });
+
+      function countUp(element) {
+        const target = Number(element.dataset.count);
+        if (REDUCE) {
+          element.textContent = target;
+          return;
+        }
+        const startedAt = performance.now();
+        const duration = 1100;
+        function tick(now) {
+          const progress = Math.min(1, (now - startedAt) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          element.textContent = Math.round(target * eased);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      if (REDUCE || !("IntersectionObserver" in window)) {
+        document.querySelectorAll("[data-reveal]").forEach(el => el.classList.add("show"));
+        countUp(number);
+        return;
+      }
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("show");
+          if (entry.target.classList.contains("hero")) countUp(number);
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: .16 });
+
+      document.querySelectorAll("[data-reveal]").forEach(el => observer.observe(el));
+    })();
+  </script>
+</body>
+</html>

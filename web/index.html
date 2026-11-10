@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A부 국회 요구자료 대응</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="./index.html"><span class="brand-mark">A부</span><span>국회 요구자료 대응</span></a>
+      <nav class="top-nav" aria-label="업무 화면">
+        <a class="nav-link" data-nav="home" href="./index.html">시작 화면</a>
+        <a class="nav-link" data-nav="assign" href="./assign.html">배분</a>
+        <button class="nav-link nav-link--future" data-coming-soon type="button">현업 회신 · S6</button>
+        <button class="nav-link nav-link--future" data-coming-soon type="button">취합 · S8</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell" id="main">
+    <section class="page-heading" data-reveal>
+      <div>
+        <p class="eyebrow">Local workspace</p>
+        <h1>요구자료 처리 현황</h1>
+        <p class="lead">접수한 문항과 배분 상태를 이 브라우저에서 확인합니다. 현재 단계에서는 자료가 서버로 전송되지 않습니다.</p>
+      </div>
+      <span class="local-badge">브라우저에만 저장</span>
+    </section>
+
+    <section class="metric-grid" data-reveal data-stagger aria-label="상태별 건수">
+      <article class="metric-card"><span class="metric-label">전체 문항</span><strong class="metric-value" data-count="전체">0</strong></article>
+      <article class="metric-card"><span class="metric-label">접수</span><strong class="metric-value" data-count="접수">0</strong></article>
+      <article class="metric-card"><span class="metric-label">배분확정</span><strong class="metric-value" data-count="배분확정">0</strong></article>
+      <article class="metric-card"><span class="metric-label">확인필요</span><strong class="metric-value" data-count="확인필요">0</strong></article>
+    </section>
+
+    <section class="panel" data-reveal>
+      <div class="panel-header">
+        <div class="panel-title"><span class="step-number">→</span><h2>업무 화면</h2></div>
+        <span class="panel-meta" id="last-updated">저장 자료 없음</span>
+      </div>
+      <div class="panel-body">
+        <div class="action-grid">
+          <a class="action-card" href="./assign.html">
+            <span class="action-number">1</span>
+            <h2>접수·배분</h2>
+            <p>PDF 또는 문항목록 CSV를 등록하고, 규칙 후보를 확인해 주관 과와 협조 과를 확정합니다.</p>
+          </a>
+          <a class="action-card action-card--disabled" href="#" data-coming-soon>
+            <span class="action-number">2</span>
+            <h2>현업 회신</h2>
+            <p>S6에서 과별 배분 문항과 회신 엑셀 점검 기능을 연결합니다.</p>
+          </a>
+          <a class="action-card action-card--disabled" href="#" data-coming-soon>
+            <span class="action-number">3</span>
+            <h2>취합·검증</h2>
+            <p>S8에서 미회신, 누락, 합계와 확인필요 사항을 한곳에 모읍니다.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./engine.js"></script>
+  <script src="./common.js"></script>
+  <script>
+    function renderStatus() {
+      const counts = AppCommon.countStatuses();
+      document.querySelectorAll("[data-count]").forEach((element) => {
+        element.textContent = counts[element.dataset.count] || 0;
+      });
+      const saved = JSON.parse(localStorage.getItem(AppCommon.STORAGE_KEY) || "null");
+      document.querySelector("#last-updated").textContent = saved?.updatedAt
+        ? `마지막 저장 ${AppCommon.formatDateTime(saved.updatedAt)}`
+        : "저장 자료 없음";
+    }
+    document.addEventListener("DOMContentLoaded", renderStatus);
+    window.addEventListener("cases:changed", renderStatus);
+    window.addEventListener("storage", renderStatus);
+  </script>
+</body>
+</html>
