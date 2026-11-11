@@ -15,8 +15,8 @@
       <nav class="top-nav" aria-label="업무 화면">
         <a class="nav-link" data-nav="home" href="./index.html">시작 화면</a>
         <a class="nav-link" data-nav="assign" href="./assign.html">배분</a>
-        <button class="nav-link nav-link--future" data-coming-soon type="button">현업 회신 · S6</button>
-        <button class="nav-link nav-link--future" data-coming-soon type="button">취합 · S8</button>
+        <a class="nav-link" data-nav="dept" href="./dept.html">현업 회신</a>
+        <a class="nav-link" data-nav="collect" href="./collect.html">취합·검증</a>
       </nav>
     </div>
   </header>
@@ -26,9 +26,9 @@
       <div>
         <p class="eyebrow">Local workspace</p>
         <h1>요구자료 처리 현황</h1>
-        <p class="lead">접수한 문항과 배분 상태를 이 브라우저에서 확인합니다. 현재 단계에서는 자료가 서버로 전송되지 않습니다.</p>
+        <p class="lead">접수한 문항과 배분·회신 상태를 한곳에서 확인합니다. 배포 주소에서는 서버에, 그 밖의 주소에서는 현재 브라우저에 기록합니다.</p>
       </div>
-      <span class="local-badge">브라우저에만 저장</span>
+      <span class="local-badge" data-storage-label>저장 위치 확인 중</span>
     </section>
 
     <section class="metric-grid" data-reveal data-stagger aria-label="상태별 건수">
@@ -36,6 +36,16 @@
       <article class="metric-card"><span class="metric-label">접수</span><strong class="metric-value" data-count="접수">0</strong></article>
       <article class="metric-card"><span class="metric-label">배분확정</span><strong class="metric-value" data-count="배분확정">0</strong></article>
       <article class="metric-card"><span class="metric-label">확인필요</span><strong class="metric-value" data-count="확인필요">0</strong></article>
+    </section>
+
+    <section class="panel chart-panel" data-reveal>
+      <div class="panel-header">
+        <div class="panel-title"><span class="step-number">↗</span><h2>처리 현황 차트</h2></div>
+        <span class="panel-meta">Chart.js · 현재 저장 자료 기준</span>
+      </div>
+      <div class="panel-body chart-shell">
+        <canvas id="status-chart" role="img" aria-label="전체·접수·배분확정·확인필요 문항 수 막대 차트"></canvas>
+      </div>
     </section>
 
     <section class="panel" data-reveal>
@@ -50,35 +60,179 @@
             <h2>접수·배분</h2>
             <p>PDF 또는 문항목록 CSV를 등록하고, 규칙 후보를 확인해 주관 과와 협조 과를 확정합니다.</p>
           </a>
-          <a class="action-card action-card--disabled" href="#" data-coming-soon>
+          <a class="action-card" href="./dept.html">
             <span class="action-number">2</span>
             <h2>현업 회신</h2>
-            <p>S6에서 과별 배분 문항과 회신 엑셀 점검 기능을 연결합니다.</p>
+            <p>내 과에 배분된 문항을 확인하고 회신 엑셀·메모를 제출하거나 사유를 적어 재배정을 요청합니다.</p>
           </a>
-          <a class="action-card action-card--disabled" href="#" data-coming-soon>
+          <a class="action-card" href="./collect.html">
             <span class="action-number">3</span>
             <h2>취합·검증</h2>
-            <p>S8에서 미회신, 누락, 합계와 확인필요 사항을 한곳에 모읍니다.</p>
+            <p>미회신과 확인필요를 살피고, 보완요청·확정 뒤 제출본을 만듭니다.</p>
           </a>
         </div>
       </div>
     </section>
+
+    <section class="panel" data-reveal>
+      <div class="panel-header">
+        <div class="panel-title"><span class="step-number">≡</span><h2>처리 기록</h2><span class="panel-meta" id="log-count">0건 / 전체 0건</span></div>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar log-filters" aria-label="처리 기록 골라 보기">
+          <label class="field"><span>작업</span><select class="select" id="log-action"><option value="">전체 작업</option></select></label>
+          <label class="field"><span>과</span><select class="select" id="log-department"><option value="">전체 과</option></select></label>
+          <label class="search-field"><span>문항 앞부분</span><input id="log-case" type="search" placeholder="문항 ID 앞부분 입력"></label>
+          <button class="button button--secondary" id="log-export" type="button">처리 기록 엑셀</button>
+        </div>
+        <div class="table-wrap" id="log-table" aria-live="polite"></div>
+      </div>
+    </section>
   </main>
 
+  <script src="./lib/papaparse.min.js"></script>
+  <script src="./lib/chart.umd.min.js"></script>
+  <script src="./lib/xlsx.full.min.js"></script>
   <script src="./engine.js"></script>
+  <script src="./flow.js"></script>
   <script src="./common.js"></script>
   <script>
+    let statusChart = null;
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function escapeHtml(value) {
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+
+    function koreanTime(value) {
+      const date = new Date(value);
+      if (!value || Number.isNaN(date.getTime())) return "-";
+      return new Intl.DateTimeFormat("ko-KR", {
+        timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+      }).format(date);
+    }
+
+    function logDepartments(entry) {
+      return [...new Set([entry.과, entry.주관과, ...(Array.isArray(entry.협조과) ? entry.협조과 : [])]
+        .map((department) => String(department || "").trim()).filter(Boolean))];
+    }
+
+    function activityRows(db) {
+      const states = new Map((db.cases || []).map((item) => [item.id, item.상태 || "-"]));
+      return [...(db.log || [])].reverse().map((entry) => {
+        const departments = logDepartments(entry);
+        return {
+          일시: koreanTime(entry.일시),
+          작업: String(entry.작업 || ""),
+          문항: String(entry.문항 || ""),
+          과: departments.join(", "),
+          지금상태: states.get(entry.문항) || "-",
+          과목록: departments,
+        };
+      });
+    }
+
+    function filteredActivityRows(rows = activityRows(AppCommon.readDb())) {
+      const action = document.querySelector("#log-action").value;
+      const department = document.querySelector("#log-department").value;
+      const casePrefix = document.querySelector("#log-case").value.trim();
+      return rows.filter((row) => (!action || row.작업 === action) &&
+        (!department || row.과목록.includes(department)) &&
+        (!casePrefix || row.문항.startsWith(casePrefix)));
+    }
+
+    function renderActivity() {
+      const rows = activityRows(AppCommon.readDb());
+      for (const [selector, values, allLabel] of [
+        ["#log-action", [...new Set(rows.map((row) => row.작업).filter(Boolean))], "전체 작업"],
+        ["#log-department", [...new Set(rows.flatMap((row) => row.과목록))].sort((a, b) => a.localeCompare(b, "ko")), "전체 과"],
+      ]) {
+        const select = document.querySelector(selector);
+        const selected = select.value;
+        select.innerHTML = `<option value="">${allLabel}</option>${values.map((value) =>
+          `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}`;
+        select.value = values.includes(selected) ? selected : "";
+      }
+      const filtered = filteredActivityRows(rows);
+      document.querySelector("#log-count").textContent = `${filtered.length}건 / 전체 ${rows.length}건`;
+      document.querySelector("#log-table").innerHTML = filtered.length
+        ? `<table><thead><tr><th>일시 (한국시간)</th><th>작업</th><th>문항</th><th>과</th><th>지금 상태</th></tr></thead><tbody>${filtered.map((row) =>
+          `<tr><td>${escapeHtml(row.일시)}</td><td>${escapeHtml(row.작업)}</td><td>${escapeHtml(row.문항)}</td><td>${escapeHtml(row.과 || "-")}</td><td>${escapeHtml(row.지금상태)}</td></tr>`).join("")}</tbody></table>`
+        : '<div class="empty-state">해당하는 처리 기록이 없습니다.</div>';
+    }
+
+    function downloadActivityWorkbook() {
+      const headers = ["일시", "작업", "문항", "과", "지금상태"];
+      const values = filteredActivityRows().map((row) =>
+        [row.일시, row.작업, row.문항, row.과, row.지금상태].map((value) =>
+          /^[=+\-@\t\r]/.test(value) ? `'${value}` : value));
+      const sheet = XLSX.utils.aoa_to_sheet([headers, ...values]);
+      sheet["!cols"] = [24, 16, 30, 36, 16].map((wch) => ({ wch }));
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, sheet, "처리 기록");
+      XLSX.writeFile(workbook, "처리기록_국회요구자료.xlsx", { compression: true });
+    }
+
+    function renderChart(counts) {
+      const values = [counts.전체, counts.접수, counts.배분확정, counts.확인필요];
+      if (statusChart) {
+        statusChart.data.datasets[0].data = values;
+        statusChart.update(reduceMotion ? "none" : undefined);
+        return;
+      }
+      statusChart = new Chart(document.querySelector("#status-chart"), {
+        type: "bar",
+        data: {
+          labels: ["전체", "접수", "배분확정", "확인필요"],
+          datasets: [{
+            label: "문항 수",
+            data: values,
+            backgroundColor: ["#19345d", "#1d5f9f", "#0f766e", "#a15c05"],
+            borderRadius: 8,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: reduceMotion ? false : { duration: 650 },
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } },
+            x: { grid: { display: false } },
+          },
+        },
+      });
+    }
+
     function renderStatus() {
       const counts = AppCommon.countStatuses();
       document.querySelectorAll("[data-count]").forEach((element) => {
         element.textContent = counts[element.dataset.count] || 0;
       });
-      const saved = JSON.parse(localStorage.getItem(AppCommon.STORAGE_KEY) || "null");
+      const saved = AppCommon.readDb();
       document.querySelector("#last-updated").textContent = saved?.updatedAt
         ? `마지막 저장 ${AppCommon.formatDateTime(saved.updatedAt)}`
         : "저장 자료 없음";
+      renderChart(counts);
+      renderActivity();
     }
-    document.addEventListener("DOMContentLoaded", renderStatus);
+    for (const selector of ["#log-action", "#log-department", "#log-case"]) {
+      document.querySelector(selector).addEventListener(selector === "#log-case" ? "input" : "change", renderActivity);
+    }
+    document.querySelector("#log-export").addEventListener("click", () => {
+      try { downloadActivityWorkbook(); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        await AppCommon.loadDb();
+      } catch (error) {
+        AppCommon.toast(error.message, "error");
+      }
+      renderStatus();
+    });
     window.addEventListener("cases:changed", renderStatus);
     window.addEventListener("storage", renderStatus);
   </script>

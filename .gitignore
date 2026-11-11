@@ -8,6 +8,7 @@ node_modules/
 
 # 실행·검사 결과
 __pycache__/
+.artifact-runtime/
 *.py[cod]
 dist/
 build/

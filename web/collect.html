@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>취합·검증 | A부 국회 요구자료 대응</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="collect">
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="app-header"><div class="header-inner">
+    <a class="brand" href="./index.html"><span class="brand-mark">A부</span><span>국회 요구자료 대응</span></a>
+    <nav class="top-nav" aria-label="업무 화면">
+      <a class="nav-link" data-nav="home" href="./index.html">시작 화면</a>
+      <a class="nav-link" data-nav="assign" href="./assign.html">배분</a>
+      <a class="nav-link" data-nav="dept" href="./dept.html">현업 회신</a>
+      <a class="nav-link" data-nav="collect" href="./collect.html">취합·검증</a>
+    </nav>
+  </div></header>
+
+  <main class="page-shell" id="main">
+    <section class="page-heading" data-reveal><div>
+      <p class="eyebrow">국회 총괄 담당</p><h1>취합·검증</h1>
+      <p class="lead">회신과 확인필요 사항을 함께 확인하고, 필요한 과에만 보완을 요청합니다. 담당자가 확인한 문항만 제출본에 담습니다.</p>
+    </div><span class="local-badge" data-storage-label>저장 위치 확인 중</span></section>
+
+    <div class="collect-tabs" role="tablist" aria-label="취합 화면 보기">
+      <button class="collect-tab" id="tab-review" role="tab" type="button" aria-controls="collect-main" aria-selected="true">검사·확정</button>
+      <button class="collect-tab" id="tab-deadline" role="tab" type="button" aria-controls="deadline-panel" aria-selected="false" tabindex="-1">기한 임박</button>
+    </div>
+
+    <div id="collect-main" role="tabpanel" aria-labelledby="tab-review">
+
+    <section class="panel" data-reveal>
+      <div class="panel-header"><div class="panel-title"><span class="step-number">1</span><h2>검사·확정</h2></div><button class="button button--secondary" id="refresh-button" type="button">최신 자료 불러오기</button></div>
+      <div class="panel-body">
+        <p class="panel-meta" id="review-count">자료를 불러오는 중입니다.</p>
+        <div id="review-list" class="review-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-reveal>
+      <div class="panel-header"><div class="panel-title"><span class="step-number">2</span><h2>과별 회신 취합표</h2></div><span class="panel-meta" id="reply-count">0행</span></div>
+      <div class="panel-body"><p class="panel-meta">각 회신의 원본 값을 행 단위로 표시합니다. 회신과와 확인필요를 함께 볼 수 있습니다.</p><div class="table-wrap collect-table" id="reply-table"></div></div>
+    </section>
+
+    <section class="panel" data-reveal>
+      <div class="panel-header"><div class="panel-title"><span class="step-number">3</span><h2>검증용 접수대장 점검</h2></div><span class="panel-meta">읽기 전용 · CSV</span></div>
+      <div class="panel-body">
+        <label class="field"><span>검증용 접수대장 CSV</span><input class="file-input" id="register-file" type="file" accept=".csv,text/csv"></label>
+        <p class="panel-meta" id="register-summary">CSV를 선택하면 누락·조직도 밖 과·중복·기간·날짜·기한·상태 공백을 점검합니다.</p>
+        <div class="table-wrap collect-table" id="register-results"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-reveal>
+      <div class="panel-header"><div class="panel-title"><span class="step-number">4</span><h2>현황·제출본</h2></div><span class="panel-meta">확정된 문항만 제출본에 포함</span></div>
+      <div class="panel-body">
+        <div class="status-summary" id="status-summary"></div>
+        <div class="collect-charts"><div class="chart-shell"><canvas id="status-chart" role="img" aria-label="상태별 문항 수 차트"></canvas></div><div class="chart-shell"><canvas id="department-chart" role="img" aria-label="과별 배분 문항 수 차트"></canvas></div></div>
+        <details class="department-summary"><summary>과별 배분 건수 보기</summary><div class="status-summary" id="department-summary"></div></details>
+        <div class="toolbar"><strong id="export-count">확정 문항 0건</strong><div class="toolbar-group"><button class="button" id="export-xlsx" type="button" disabled>제출본 엑셀</button><button class="button button--secondary" id="export-md" type="button" disabled>제출본 Markdown</button></div></div>
+      </div>
+    </section>
+    </div>
+
+    <section class="panel deadline-panel" id="deadline-panel" role="tabpanel" aria-labelledby="tab-deadline" hidden>
+      <div class="panel-header"><div class="panel-title"><span class="step-number">!</span><h2>기한 임박</h2></div><span class="panel-meta">안내문은 파일로만 내려받습니다.</span></div>
+      <div class="panel-body">
+        <div class="toolbar deadline-controls">
+          <label class="field"><span>기준일</span><input class="select" id="deadline-base" type="date"></label>
+          <label class="field"><span>임박 일수</span><input class="select" id="deadline-days" type="number" min="0" step="1" value="2"></label>
+          <label class="field"><span>발신</span><input class="select" id="deadline-sender" type="text" value="국회 총괄 담당"></label>
+        </div>
+        <p class="panel-meta">배분확정·회신중·보완요청 문항에서 회신이 남은 과만 표시합니다. 보완 대상 과는 다시 회신할 때까지 포함됩니다.</p>
+        <div class="toolbar"><strong id="deadline-count" aria-live="polite">대상 0건 · 0개 과</strong><div class="toolbar-group"><button class="button" id="deadline-xlsx" type="button">독촉 목록 엑셀</button><button class="button button--secondary" id="deadline-txt" type="button">과별 안내문 받기</button></div></div>
+        <div class="table-wrap collect-table" id="deadline-table" aria-live="polite"></div>
+        <h3 class="deadline-check-title">제출기한 확인필요 <span class="panel-meta" id="deadline-check-count">0건</span></h3>
+        <div class="table-wrap collect-table" id="deadline-check-table" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./lib/papaparse.min.js"></script>
+  <script src="./lib/xlsx.full.min.js"></script>
+  <script src="./lib/chart.umd.min.js"></script>
+  <script src="./engine.js"></script>
+  <script src="./validate.js"></script>
+  <script src="./flow.js"></script>
+  <script src="./common.js"></script>
+  <script>
+    const reviewList = document.querySelector("#review-list");
+    const replyTable = document.querySelector("#reply-table");
+    const statusSummary = document.querySelector("#status-summary");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let departments = [];
+    let statusChart = null;
+    let departmentChart = null;
+
+    function escapeHtml(value) {
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+    function safeCell(value) {
+      const text = String(value ?? "");
+      return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    }
+    function assigned(item) { return [item.주관과, ...(item.협조과 || [])].filter(Boolean); }
+    function flatReplies(cases) {
+      return cases.flatMap((item) => (item.과별회신 || []).flatMap((reply) =>
+        (reply.행 || []).map((row) => ({
+          문항ID: item.id, 의원: item.의원, 문항번호: item.문항번호,
+          회신과: reply.과, ...row,
+          확인필요: (reply.확인필요 || []).map((check) => check.유형).join(", "),
+        })),
+      ));
+    }
+    function tableHtml(rows, emptyText) {
+      if (!rows.length) return `<div class="empty-state">${escapeHtml(emptyText)}</div>`;
+      const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
+      return `<table><thead><tr>${columns.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) =>
+        `<tr>${columns.map((column) => `<td>${escapeHtml(row[column])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+    function localToday() {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+      }).formatToParts(new Date());
+      const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+      return `${values.year}-${values.month}-${values.day}`;
+    }
+    function dateDay(value) {
+      const match = String(value ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!match) return null;
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      const day = Number(match[3]);
+      const timestamp = Date.UTC(year, month - 1, day);
+      const parsed = new Date(timestamp);
+      return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day
+        ? timestamp / 86400000 : null;
+    }
+    function deadlineResult(cases = AppCommon.readCases(), baseDate = document.querySelector("#deadline-base").value,
+      daysValue = document.querySelector("#deadline-days").value) {
+      const baseDay = dateDay(baseDate);
+      const windowDays = Number(daysValue);
+      if (baseDay === null) throw new Error("기준일을 확인하세요.");
+      if (!Number.isInteger(windowDays) || windowDays < 0 || String(daysValue).trim() === "") {
+        throw new Error("임박 일수는 0 이상의 정수로 입력하세요.");
+      }
+      const targets = [];
+      const checks = [];
+      for (const item of cases) {
+        if (!["배분확정", "회신중", "보완요청"].includes(item.상태)) continue;
+        const replied = new Set((item.과별회신 || []).map((reply) => reply.과));
+        const pending = [...(item.보완 || [])].reverse().find((entry) => !entry.완료일시);
+        for (const department of new Set(assigned(item))) {
+          if (replied.has(department) && pending?.과 !== department) continue;
+          const common = {
+            과: department, 제출기한: String(item.제출기한 ?? ""),
+            문항: String(item.id ?? ""), 요구내용: String(item.요구내용 ?? ""), 상태: item.상태,
+          };
+          const dueDay = dateDay(common.제출기한);
+          if (dueDay === null) {
+            checks.push({ ...common, 확인필요: "제출기한을 날짜로 읽을 수 없습니다." });
+            continue;
+          }
+          const remaining = dueDay - baseDay;
+          if (remaining <= windowDays) targets.push({
+            ...common, 구분: remaining < 0 ? "기한 경과" : remaining === 0 ? "D-day" : `D-${remaining}`,
+            남은날: remaining,
+          });
+        }
+      }
+      targets.sort((a, b) => a.과.localeCompare(b.과, "ko") || a.남은날 - b.남은날 || a.문항.localeCompare(b.문항, "ko"));
+      checks.sort((a, b) => a.과.localeCompare(b.과, "ko") || a.문항.localeCompare(b.문항, "ko"));
+      return { targets, checks };
+    }
+    function reminderRows(result) {
+      return result.targets.map(({ 과, 구분, 제출기한, 문항, 요구내용, 상태 }) =>
+        ({ 과, 구분, 제출기한, 문항, 요구내용, 상태 }));
+    }
+    function renderDeadline() {
+      try {
+        const result = deadlineResult();
+        const rows = reminderRows(result);
+        document.querySelector("#deadline-count").textContent =
+          `대상 ${rows.length}건 · ${new Set(rows.map((row) => row.과)).size}개 과`;
+        document.querySelector("#deadline-table").innerHTML = tableHtml(rows, "기한 임박 또는 경과 대상이 없습니다.");
+        document.querySelector("#deadline-check-count").textContent = `${result.checks.length}건`;
+        document.querySelector("#deadline-check-table").innerHTML = tableHtml(result.checks, "날짜 확인이 필요한 대상이 없습니다.");
+      } catch (error) {
+        document.querySelector("#deadline-count").textContent = error.message;
+        document.querySelector("#deadline-table").innerHTML = "";
+        document.querySelector("#deadline-check-count").textContent = "0건";
+        document.querySelector("#deadline-check-table").innerHTML = "";
+      }
+    }
+    function downloadDeadlineWorkbook() {
+      const result = deadlineResult();
+      const workbook = XLSX.utils.book_new();
+      for (const [name, headers, rows] of [
+        ["독촉목록", ["과", "구분", "제출기한", "문항", "요구내용", "상태"], reminderRows(result)],
+        ["확인필요", ["과", "제출기한", "문항", "요구내용", "상태", "확인필요"], result.checks],
+      ]) {
+        const values = rows.map((row) => headers.map((header) => safeCell(row[header])));
+        const sheet = XLSX.utils.aoa_to_sheet([headers, ...values]);
+        sheet["!cols"] = headers.map((header) => ({ wch: header === "요구내용" ? 50 : header === "문항" ? 28 : 18 }));
+        XLSX.utils.book_append_sheet(workbook, sheet, name);
+      }
+      XLSX.writeFile(workbook, "독촉목록_국회요구자료.xlsx", { compression: true });
+    }
+    function reminderText(result, sender) {
+      const cleanSender = String(sender ?? "").trim();
+      if (!cleanSender) throw new Error("발신을 입력하세요.");
+      const groups = new Map();
+      for (const row of result.targets) {
+        if (!groups.has(row.과)) groups.set(row.과, []);
+        groups.get(row.과).push(row);
+      }
+      if (!groups.size) return `국회 요구자료 회신 안내\n\n대상 과가 없습니다.\n\n발신: ${cleanSender}\n`;
+      const oneLine = (value) => String(value ?? "").replaceAll(/\r?\n/g, " ");
+      return [...groups].map(([department, rows]) => [
+        `수신: ${department}`,
+        "제목: 국회 요구자료 회신 요청",
+        `건수: ${rows.length}건`,
+        "목록:",
+        ...rows.map((row) => `- ${row.구분} · ${row.제출기한} · ${oneLine(row.문항)} · ${oneLine(row.요구내용)}`),
+        `발신: ${cleanSender}`,
+      ].join("\n")).join("\n\n---\n\n") + "\n";
+    }
+    function downloadReminderText() {
+      const content = reminderText(deadlineResult(), document.querySelector("#deadline-sender").value);
+      const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url; link.download = "과별_국회요구자료_회신안내.txt";
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    }
+    function selectCollectTab(name) {
+      const deadline = name === "deadline";
+      document.querySelector("#collect-main").hidden = deadline;
+      document.querySelector("#deadline-panel").hidden = !deadline;
+      for (const [selector, selected] of [["#tab-review", !deadline], ["#tab-deadline", deadline]]) {
+        const button = document.querySelector(selector);
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      }
+      if (deadline) renderDeadline();
+    }
+    function renderReview(cases) {
+      const active = cases.filter((item) => !["접수", "재배정요청"].includes(item.상태));
+      const allIssues = active.reduce((sum, item) => sum + (item.과별회신 || []).reduce((n, reply) => n + (reply.확인필요 || []).length, 0), 0);
+      document.querySelector("#review-count").textContent = `검토 문항 ${active.length}건 · 회신 확인필요 ${allIssues}건`;
+      reviewList.innerHTML = active.length ? active.map((item) => {
+        const replies = item.과별회신 || [];
+        const missing = assigned(item).filter((department) => !replies.some((reply) => reply.과 === department));
+        const pending = [...(item.보완 || [])].reverse().find((entry) => !entry.완료일시);
+        return `<article class="review-card" data-case-id="${escapeHtml(item.id)}">
+          <div class="review-card__head"><div><span class="status ${item.상태 === "확정" ? "status--done" : item.상태 === "보완요청" ? "status--alert" : ""}">${escapeHtml(item.상태)}</span><h3>${escapeHtml(item.의원)} · ${escapeHtml(item.문항번호)}번</h3><p>${escapeHtml(item.요구내용)}</p></div><span class="assignment-chip">주관 ${escapeHtml(item.주관과)}</span></div>
+          ${missing.length ? `<p class="check-item">미회신: ${escapeHtml(missing.join(", "))}</p>` : ""}
+          ${pending ? `<p class="check-item">${escapeHtml(pending.과)} 보완 대기 · ${escapeHtml(pending.사유)}</p>` : ""}
+          ${replies.length ? `<div class="review-replies">${replies.map((reply) => `<div><strong>${escapeHtml(reply.과)}</strong> · ${escapeHtml(reply.파일명)} · ${(reply.행 || []).length}행${(reply.확인필요 || []).length ? `<ul>${reply.확인필요.map((check) => `<li>${escapeHtml(check.위치)} · ${escapeHtml(check.유형)}: ${escapeHtml(check.내용)}</li>`).join("")}</ul>` : '<span class="check-ok">자동 점검 사항 없음</span>'}</div>`).join("")}</div>` : '<p class="panel-meta">저장된 회신이 없습니다.</p>'}
+          ${["회신중", "회신완료"].includes(item.상태) && replies.length ? `<div class="review-actions"><label class="field"><span>보완 대상 과</span><select class="select supplement-dept">${replies.map((reply) => `<option value="${escapeHtml(reply.과)}">${escapeHtml(reply.과)}</option>`).join("")}</select></label><label class="field"><span>보완 사유</span><textarea class="textarea supplement-reason" rows="2"></textarea></label><button class="button button--danger supplement-button" type="button">보완요청</button></div>` : ""}
+          ${item.상태 === "회신완료" ? `<div class="review-actions"><label class="field"><span>확정 코멘트</span><textarea class="textarea confirm-comment" rows="2"></textarea></label><button class="button button--success confirm-button" type="button">확인 완료</button></div>` : ""}
+          ${item.상태 === "확정" ? `<p class="check-ok">확정 코멘트: ${escapeHtml(item.확정코멘트)}</p>` : ""}
+        </article>`;
+      }).join("") : '<div class="empty-state">배분된 문항이 없습니다.</div>';
+    }
+    function makeChart(canvas, current, labels, values, horizontal = false) {
+      if (current) {
+        current.data.labels = labels;
+        current.data.datasets[0].data = values;
+        current.update(reduceMotion ? "none" : undefined);
+        return current;
+      }
+      return new Chart(canvas, {
+        type: "bar",
+        data: { labels, datasets: [{ label: "문항 수", data: values, backgroundColor: "#1d5f9f", borderRadius: 6 }] },
+        options: { indexAxis: horizontal ? "y" : "x", responsive: true, maintainAspectRatio: false,
+          animation: reduceMotion ? false : { duration: 600 },
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: horizontal, ticks: horizontal ? { precision: 0 } : {} }, y: { beginAtZero: !horizontal, ticks: horizontal ? {} : { precision: 0 } } },
+        },
+      });
+    }
+    function renderSummary(cases) {
+      const statuses = ["접수", "배분확정", "회신중", "회신완료", "보완요청", "재배정요청", "확정"];
+      const values = statuses.map((status) => cases.filter((item) => item.상태 === status).length);
+      statusSummary.innerHTML = statuses.map((status, index) => `<div class="summary-chip"><span>${status}</span><strong>${values[index]}</strong></div>`).join("");
+      statusChart = makeChart(document.querySelector("#status-chart"), statusChart, statuses, values);
+      const departmentValues = departments.map((department) => cases.filter((item) => assigned(item).includes(department)).length);
+      departmentChart = makeChart(document.querySelector("#department-chart"), departmentChart, departments, departmentValues, true);
+      document.querySelector("#department-summary").innerHTML = departments.map((department, index) =>
+        `<div class="summary-chip"><span>${escapeHtml(department)}</span><strong>${departmentValues[index]}</strong></div>`).join("");
+      const confirmed = cases.filter((item) => item.상태 === "확정");
+      document.querySelector("#export-count").textContent = `확정 문항 ${confirmed.length}건`;
+      document.querySelector("#export-xlsx").disabled = !confirmed.length;
+      document.querySelector("#export-md").disabled = !confirmed.length;
+    }
+    function renderAll() {
+      const cases = AppCommon.readCases();
+      renderReview(cases);
+      const rows = flatReplies(cases);
+      replyTable.innerHTML = tableHtml(rows, "저장된 회신 행이 없습니다.");
+      document.querySelector("#reply-count").textContent = `${rows.length}행`;
+      renderSummary(cases);
+      renderDeadline();
+    }
+    async function saveAction(button, request) {
+      button.disabled = true;
+      try {
+        await AppCommon.applyRequest(request, departments);
+        renderAll();
+        AppCommon.toast(`${request.작업}을 기록했습니다.`, "success");
+      } catch (error) { AppCommon.toast(error.message, "error"); }
+      finally { button.disabled = false; }
+    }
+    function exportRows() {
+      const confirmed = AppCommon.readCases().filter((item) => item.상태 === "확정");
+      if (!confirmed.length) throw new Error("확정된 문항이 없습니다.");
+      const list = confirmed.map((item) => ({
+        문항ID: item.id, 위원회: item.위원회, 의원: item.의원, 문항번호: item.문항번호,
+        요구내용: item.요구내용, 주관과: item.주관과, 협조과: (item.협조과 || []).join(", "),
+        확정코멘트: item.확정코멘트,
+      }));
+      return { list, replies: flatReplies(confirmed) };
+    }
+    function downloadMarkdown() {
+      const { list, replies } = exportRows();
+      const escapeMd = (value) => String(value ?? "").replaceAll("|", "\\|").replaceAll(/\r?\n/g, " ");
+      const makeTable = (rows) => {
+        if (!rows.length) return "회신 행이 없습니다.";
+        const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
+        return [`| ${columns.join(" | ")} |`, `| ${columns.map(() => "---").join(" | ")} |`,
+          ...rows.map((row) => `| ${columns.map((column) => escapeMd(row[column])).join(" | ")} |`)].join("\n");
+      };
+      const text = `# 국회 요구자료 제출본\n\n확정 문항 ${list.length}건\n\n## 제출목록\n\n${makeTable(list)}\n\n## 문항별 취합표\n\n${makeTable(replies)}\n`;
+      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url; link.download = `요구자료_제출본_${new Date().toISOString().slice(0, 10)}.md`;
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    }
+    function downloadWorkbook() {
+      const { list, replies } = exportRows();
+      const workbook = XLSX.utils.book_new();
+      for (const [name, rows] of [["제출목록", list], ["문항별 취합표", replies]]) {
+        const safeRows = rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [key, safeCell(value)])));
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(safeRows.length ? safeRows : [{ 안내: "회신 행이 없습니다." }]), name);
+      }
+      XLSX.writeFile(workbook, `요구자료_제출본_${new Date().toISOString().slice(0, 10)}.xlsx`, { compression: true });
+    }
+
+    reviewList.addEventListener("click", (event) => {
+      const card = event.target.closest(".review-card");
+      if (!card) return;
+      const supplement = event.target.closest(".supplement-button");
+      const confirm = event.target.closest(".confirm-button");
+      if (supplement) {
+        const reason = card.querySelector(".supplement-reason").value.trim();
+        if (!reason) return AppCommon.toast("보완 사유를 입력하세요.", "error");
+        saveAction(supplement, { 작업: "보완요청", id: card.dataset.caseId, 과: card.querySelector(".supplement-dept").value, 사유: reason });
+      }
+      if (confirm) {
+        const comment = card.querySelector(".confirm-comment").value.trim();
+        if (!comment) return AppCommon.toast("확정 코멘트를 입력하세요.", "error");
+        saveAction(confirm, { 작업: "확정", id: card.dataset.caseId, 확정코멘트: comment });
+      }
+    });
+    document.querySelector("#refresh-button").addEventListener("click", async () => {
+      try { await AppCommon.loadDb(); renderAll(); AppCommon.toast("최신 자료를 불러왔습니다.", "success"); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.querySelector("#register-file").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const rows = AppCommon.csvToObjects(await file.text());
+        const issues = RequestValidation.validateRegister(rows, departments);
+        document.querySelector("#register-summary").textContent = `${rows.length}행 점검 · 확인필요 ${issues.length}건 · 원본은 변경하지 않았습니다.`;
+        document.querySelector("#register-results").innerHTML = tableHtml(issues, "자동 점검에서 확인필요 사항이 없습니다.");
+      } catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.querySelector("#export-xlsx").addEventListener("click", () => {
+      try { downloadWorkbook(); AppCommon.toast("제출본 엑셀을 만들었습니다.", "success"); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.querySelector("#export-md").addEventListener("click", () => {
+      try { downloadMarkdown(); AppCommon.toast("제출본 Markdown을 만들었습니다.", "success"); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.querySelector("#deadline-base").value = localToday();
+    for (const selector of ["#deadline-base", "#deadline-days", "#deadline-sender"]) {
+      document.querySelector(selector).addEventListener("input", renderDeadline);
+    }
+    document.querySelector("#tab-review").addEventListener("click", () => selectCollectTab("review"));
+    document.querySelector("#tab-deadline").addEventListener("click", () => selectCollectTab("deadline"));
+    document.querySelector(".collect-tabs").addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      const next = document.querySelector("#tab-deadline").getAttribute("aria-selected") === "true" ? "review" : "deadline";
+      selectCollectTab(next);
+      document.querySelector(next === "deadline" ? "#tab-deadline" : "#tab-review").focus();
+    });
+    document.querySelector("#deadline-xlsx").addEventListener("click", () => {
+      try { downloadDeadlineWorkbook(); AppCommon.toast("독촉 목록 엑셀을 만들었습니다.", "success"); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.querySelector("#deadline-txt").addEventListener("click", () => {
+      try { downloadReminderText(); AppCommon.toast("과별 안내문을 내려받았습니다.", "success"); }
+      catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const [reference] = await Promise.all([AppCommon.loadReferenceData(), AppCommon.loadDb()]);
+        departments = reference.departments;
+        renderAll();
+      } catch (error) { AppCommon.toast(error.message, "error"); }
+    });
+  </script>
+</body>
+</html>

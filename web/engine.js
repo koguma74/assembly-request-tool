@@ -1,6 +1,7 @@
 (function initializeEngine(root, factory) {
   if (typeof module === "object" && module.exports) {
     module.exports = factory({
+      papa: require("./lib/papaparse.min.js"),
       readText(filePath) {
         return require("node:fs").readFileSync(filePath, "utf8");
       },
@@ -10,8 +11,7 @@
           rules: path.join(
             __dirname,
             "..",
-            "data",
-            "배분기준표_소관키워드_304건.csv",
+            "rules_보강.csv",
           ),
           organization: path.join(
             __dirname,
@@ -23,59 +23,31 @@
       },
     });
   } else {
-    const api = factory();
+    const api = factory({ papa: root.Papa });
     root.AllocationEngine = api;
     root.classify = api.classify;
   }
 })(typeof globalThis !== "undefined" ? globalThis : this, function createEngine(nodeIo) {
   "use strict";
 
+  nodeIo ||= {};
+
   let activeClassifier = null;
 
   function parseCsv(text) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let inQuotes = false;
-    const source = String(text).replace(/^\uFEFF/, "");
-
-    for (let index = 0; index < source.length; index += 1) {
-      const character = source[index];
-
-      if (inQuotes) {
-        if (character === '"' && source[index + 1] === '"') {
-          field += '"';
-          index += 1;
-        } else if (character === '"') {
-          inQuotes = false;
-        } else {
-          field += character;
-        }
-      } else if (character === '"') {
-        inQuotes = true;
-      } else if (character === ",") {
-        row.push(field);
-        field = "";
-      } else if (character === "\n") {
-        row.push(field);
-        rows.push(row);
-        row = [];
-        field = "";
-      } else if (character !== "\r") {
-        field += character;
-      }
+    if (!nodeIo.papa?.parse) {
+      throw new Error("Papa Parse를 불러오지 못했습니다.");
     }
-
-    if (inQuotes) {
-      throw new Error("CSV의 인용부호가 닫히지 않았습니다.");
+    const result = nodeIo.papa.parse(String(text).replace(/^\uFEFF/, ""), {
+      delimiter: ",",
+      dynamicTyping: false,
+      skipEmptyLines: false,
+    });
+    const quoteError = result.errors.find((error) => error.code === "MissingQuotes");
+    if (quoteError) {
+      throw new Error(`CSV 인용부호를 확인하세요: ${quoteError.message}`);
     }
-
-    if (field !== "" || row.length > 0) {
-      row.push(field);
-      rows.push(row);
-    }
-
-    return rows;
+    return result.data.map((row) => row.map((value) => String(value ?? "")));
   }
 
   function csvToObjects(text) {
@@ -211,7 +183,7 @@
 
   const api = { classify, initialize, createClassifier, parseCsv };
 
-  if (nodeIo) {
+  if (nodeIo.resolveDefaultPaths && nodeIo.readText) {
     const paths = nodeIo.resolveDefaultPaths();
     activeClassifier = createClassifier(
       nodeIo.readText(paths.rules),
