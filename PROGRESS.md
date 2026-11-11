@@ -65,7 +65,7 @@
 | GitHub | 배포용 저장소 `main`에 33개 변경 파일을 `a142a83` (`v1.0 최종`)로 커밋하고 `origin/main`에 푸시했다. 원문 PDF·부서회신 원본·환경파일은 추적되지 않는다. | 없음 |
 | 자동 시험 | 배포용 저장소에서 `node test_api.js` 16건, `node test_validate.js`의 회신·대장·상태 시험, `node test_engine.js` 40건, 웹 문법·라이브러리 시험과 `python test_web.py` 7건이 통과했다. | 실제 브라우저 흐름 확인 |
 | Vercel | 저장소 최상위를 프로젝트 루트로 설정했다. 커밋 `a142a83`의 프로덕션 배포 `dpl_49ikkSn62MRiNm5y93htFxAEjZCK`가 `READY`이며 빌드 로그에 완료가 기록됐다. 주소는 `https://assembly-request-tool-nics7.vercel.app/`이다. | 로그인 보호 때문에 외부 HTTP 요청은 앱 대신 Vercel 로그인 화면을 받는다. 인증 후 화면·API를 확인한다. |
-| 서버 저장 | 서울 리전의 비공개 Vercel Blob 저장소를 연결했고 프로덕션에 `BLOB_READ_WRITE_TOKEN` 환경변수가 존재함을 값 노출 없이 확인했다. | 실제 GET/POST 저장·재조회 시험 |
+| 서버 저장 | 서울 리전의 비공개 Vercel Blob 저장소를 연결했다. `BLOB_READ_WRITE_TOKEN`을 읽을 수 없는 Secret 유형으로 바꾸고 보안 경고 0건을 값 노출 없이 확인했다. | 로그인한 사용자의 실제 GET/POST 저장·재조회 시험 |
 | AI 추천 | 프로덕션에 `OPENAI_API_KEY`가 없다. 키가 없으면 API가 안내 문구와 500을 반환하도록 구현·시험했다. | 사용자가 Vercel에 키를 등록한 뒤 실제 AI 추천 시험 |
 | 공개 접근 | 현재 Vercel 로그인 보호가 켜져 있다. 자동 승인 검토가 보호 해제를 거절했고, 사용자가 로그인 보호 유지를 선택했다. | 보호를 유지한 상태에서 권한 있는 사용자가 앱을 확인한다. |
 
